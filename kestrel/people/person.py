@@ -4,7 +4,7 @@ from kestrel.core import utils
 
 def edit( request, username, first_name, last_name, desc = '', phone = '', address = '', gender = 'N', dateofbirth = None, 
 	edit = None,  _ts = None, csrfmiddlewaretoken = None, id = None, **kwargs ):
-	kwargs[ 'page' ] = 'people/home/view'
+	kwargs[ 'page' ] = 'people/profile'
 	data = { 'valid' : False, 'errors' : None }
 
 	try :
@@ -36,7 +36,7 @@ def edit( request, username, first_name, last_name, desc = '', phone = '', addre
 	return utils.success( kwargs, data = data )
 
 def passwd( request, username, current, password, cnfpasswd, passwd = None,  _ts = None, csrfmiddlewaretoken = None, **kwargs ):
-	kwargs[ 'page' ] = 'people/home/view'
+	kwargs[ 'page' ] = 'people/profile'
 	data = { 'valid' : False, 'errors' : None, 'passwd' : True }
 	
 	try :
@@ -64,7 +64,7 @@ def passwd( request, username, current, password, cnfpasswd, passwd = None,  _ts
 	return utils.success( kwargs, data = data )
 
 def photo( request, username, photo = None,  _ts = None, csrfmiddlewaretoken = None, id = None, **kwargs ):
-	kwargs[ 'page' ] = 'people/home/view'
+	kwargs[ 'page' ] = 'people/profile'
 	data = { 'valid' : False, 'errors' : None, 'photo' : True }
 	
 	try :
@@ -88,20 +88,21 @@ def photo( request, username, photo = None,  _ts = None, csrfmiddlewaretoken = N
 		# data[ 'photo' ] = not data[ 'valid' ]	# data[ 'view' ] = data[ 'valid' ]
 	return utils.success( kwargs, data = data )
 
-def reset( request, username, resetpass = None, csrfmiddlewaretoken = None, **kwargs ):
+def reset( request, username = None, resetpass = None, csrfmiddlewaretoken = None, **kwargs ):
 	kwargs[ 'page' ] = 'account/login'
-	data = { 'valid' : False, 'errors' : None, 'reset' : True }
-	
+	data = { 'valid' : True, 'errors' : None, 'reset' : True }
+
 	if request.user.is_authenticated():
-		return kwargs
+		return utils.fail( kwargs, data = data, errors = 'Invalid Request' )
 	
 	try:
 		u = User.objects.get( username = username )
+		print u
 		if not u.is_active:
 			return utils.fail( kwargs, data = data, errors = 'Invalid Username' )
 		if not u.get_profile().reset():
 			return utils.fail( kwargs, data = data, errors = 'Error Sending Mail' )
 	except User.DoesNotExist:
 		return utils.fail( kwargs, data = data, errors = 'Invalid Username' )
-	
+		
 	return utils.success( kwargs, data = data )

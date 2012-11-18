@@ -37,7 +37,7 @@ def verify( request, username = None, code = None, **kwargs ):
 	return response.run( request, **kwargs )
 	
 def profile( request, username, **kwargs ):
-	kwargs[ 'page' ] = 'people/person/profile'
+	kwargs[ 'page' ] = 'people/profile'
 	data = { 'success' : False, 'errors' : None, 'view' : True }
 	print username
 	
@@ -57,7 +57,7 @@ def profile( request, username, **kwargs ):
 	return utils.success( kwargs, data = data )
 
 def credits( request, username, **kwargs ):
-	kwargs[ 'page' ] = 'people/person/credits'
+	kwargs[ 'page' ] = 'people/credits'
 	data = { 'success' : False, 'errors' : None, 'view' : True }
 	
 	if username:

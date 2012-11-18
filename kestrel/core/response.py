@@ -1,4 +1,5 @@
 # kestrel core response service
+from django.conf import settings
 from django.shortcuts import render_to_response
 from django.template.loader import get_template
 from django.template import RequestContext
@@ -10,6 +11,7 @@ def run(request, format = None, page = 'page/home', data = {}, **kwargs):
 	#	del kwargs['page']
 	if data.has_key('xplore'):
 		del data['xplore']
+	data[ 'settings' ] = settings
 
 	# respond json html data
 	if format == '.json':

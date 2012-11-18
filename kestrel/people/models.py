@@ -3,7 +3,7 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models.signals import post_save
+# from django.db.models.signals import post_save
 from kestrel.interlink.models import Node
 from kestrel.storage.models import File, Directory
 
@@ -23,6 +23,7 @@ class Person( Node ):
 	
 	def add( self, *args, **kwargs ):
 		if not self.type: self.type = Node.objects.get( id = settings.PEOPLE_PERSON_TYPE )
+		if not self.visibility: self.visibility = 1
 		super( Person, self ).add( *args, **kwargs )
 	
 	def set_path( self, *args, **kwargs ):
@@ -65,16 +66,20 @@ class Person( Node ):
 		)
 		return email.send()
 	
-	def transaction( self, amount, *args, **kwargs ):
+	# 	TODO logs
+	def transaction( self, amount, payto, *args, **kwargs ):
 		if self.credits < amount: return False
 		if amount > 0:
 			self.credits = models.F( 'credits' ) - amount
 			self.save()
 			self = Person.objects.get( id = self.id )
+			
+			payto.credits = models.F( 'credits' ) + amount
+			payto.save()
 		return True
 
 # 	register handler for user
-def create_person( sender, instance, created, **kwargs ):
+def create_person_main( sender, instance, created, **kwargs ):
     if created:
 		stghome = Directory( name = instance.username, parent = Node.objects.get( id = settings.PEOPLE_PERSON_STORAGE_HOME ) )
 		stghome.add()
@@ -107,4 +112,5 @@ def create_person( sender, instance, created, **kwargs ):
 		person.owner = person
 		person.save()
 
-post_save.connect( create_person, sender = User )
+# post_save.connect( create_person, sender = User )
+__import__( settings.PEOPLE_CONNECT_MODULE )

@@ -18,7 +18,7 @@ def rate( request, id, username, _ts = None, csrfmiddlewaretoken = None, **kwarg
 			return utils.fail( kwargs, data = data, errors = 'Invalid User' )
 		
 		p = request.user.get_profile()
-		sql = ''.join( [ 'SELECT *, exists( SELECT `interlink_bridge`.`id` from `interlink_bridge` where `src_id`=', str( p.id ),' and `sink_id`=`interlink_node`.`id` and `base`=', str( settings.LIBRARY_RATING_TYPE ),' ) as `done` from `interlink_node` WHERE `interlink_node`.`id`=', str( id ),' LIMIT 1' ] )
+		sql = ''.join( [ 'SELECT *, exists( SELECT `interlink_bridge`.`id` from `interlink_bridge` where `src_id`=', str( p.id ),' and `sink_id`=`interlink_node`.`id` and `base`=', str( settings.ENGINE_RATING_TYPE ),' ) as `done` from `interlink_node` WHERE `interlink_node`.`id`=', str( id ),' LIMIT 1' ] )
 		
 		n = Node.objects.raw( sql )[ 0 ]
 		rating = -1 if n.done else 1
@@ -27,14 +27,15 @@ def rate( request, id, username, _ts = None, csrfmiddlewaretoken = None, **kwarg
 			n.rating = models.F( 'rating' ) + rating
 			n.save()
 			if n.done:
-				n.unlink( parent = p, base = settings.LIBRARY_RATING_TYPE )
+				n.unlink( parent = p, base = settings.ENGINE_RATING_TYPE )
 			else:
-				n.link( parent = p, base = settings.LIBRARY_RATING_TYPE )
+				n.link( parent = p, base = settings.ENGINE_RATING_TYPE )
 			
 			n = Node.objects.raw( sql )[ 0 ]
 			data[ 'node' ] = n
 			if n.done:
 				data[ 'ratings' ] = set( [ n.id ] )
+			print n.rating
 		else:
 			return utils.fail( kwargs, data = data, errors = 'Not Authorized' )
 		

@@ -56,7 +56,7 @@ def add(request, username, name, type = settings.STORAGE_DIRECTORY_TYPE, id = se
 		if d.authorize( request, action = 'add' ):
 			d = Directory( name = name, owner = p, parent = s )
 			if data[ 'regions' ]: d.type = int( type )
-			d.add( base = settings.GRAPH_COLOR_ALL ] )
+			d.add( base = settings.INTERLINK_COLOR_ALL )
 			d.link( parent = s, base = p )
 			data[ 'directory' ] = d
 		else:
@@ -134,7 +134,8 @@ def file( request, id, _ts = None, csrfmiddlewaretoken = None, **kwargs ):
 		if f.authorize( request, action = f.read ):
 			response = HttpResponse( content_type = f.mime )
 			response[ 'Content-Length' ] = f.file.size
-			response[ 'Content-Disposition' ] = 'attachment; filename=%s' % f.desc
+			response[ 'Content-Disposition' ] = 'filename=%s' % f.desc
+			response[ 'Content-Type' ] = f.mime
 			response.write( open( f.get_path(), "rb" ).read() )
 			return response
 		else:
@@ -165,7 +166,7 @@ def upload( request, username, name = None, id = None, parent = settings.STORAGE
 		if not id:
 			if s.authorize( request, action = 'add' ):
 				f = File( name = name, type = settings.STORAGE_FILE_TYPE, owner = p, parent = s )
-				f.add( base = settings.GRAPH_COLOR_ALL )
+				f.add( base = settings.INTERLINK_COLOR_ALL )
 				f.link( parent = s, base = p )
 				data[ 'file' ] = f
 			else: 

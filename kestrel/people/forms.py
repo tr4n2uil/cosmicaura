@@ -7,7 +7,7 @@ reserved = [ 'about', 'abhishek', 'access', 'account', 'accounts', 'add', 'addre
  
 class RegistrationForm(forms.Form):
 	username = forms.CharField(max_length = 30, required = True)
-	email = forms.EmailField(max_length = 30, required = True)
+	email = forms.EmailField(max_length = 75, required = True)
 	password1 = forms.CharField(widget=forms.PasswordInput, max_length = 30, required = True)
 	password2 = forms.CharField(widget=forms.PasswordInput, max_length = 30, required = True)
 
