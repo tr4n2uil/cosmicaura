@@ -20,7 +20,7 @@ def run(request, mappings = {}, parse = 'post', service = None, operation = None
 		data = {}
 	
 	config = mappings.get(service, None)
-	print config
+	print "\n\n", config
 	if config != None:
 		service = getattr(__import__(config[0], globals(), locals(), [operation if operation else config[1]], -1), operation if operation else config[1])
 		kwargs = service(request, **(dict(kwargs.items() + data.items()))) # +  ([('id', id)] if id else []))))

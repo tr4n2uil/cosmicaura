@@ -1,4 +1,4 @@
-import datetime, random, sha, pytz
+import datetime, random, hashlib, pytz
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.contrib.auth.models import User
@@ -32,8 +32,8 @@ class Person( Node ):
 	
 	#	should be called for valid person only not page
 	def verify( self, *args, **kwargs ):
-		salt = sha.new( str( random.random() ) ).hexdigest()[ :5 ]
-		self.activation_key = sha.new( salt + self.user.username ).hexdigest()
+		salt = hashlib.sha1( str( random.random() ) ).hexdigest()[ :5 ]
+		self.activation_key = hashlib.sha1( salt + self.user.username ).hexdigest()
 		self.key_expires = datetime.datetime.today().replace( tzinfo = pytz.UTC ) + datetime.timedelta( settings.PEOPLE_VERIFY_EXPIRY )
 		self.save()
 		self.user.is_active = False
@@ -54,8 +54,8 @@ class Person( Node ):
 		return False
 	
 	def reset( self, *args, **kwargs ):
-		salt = sha.new( str( random.random() ) ).hexdigest()[ :5 ]
-		password = sha.new( salt + self.user.username ).hexdigest()[ :8 ]
+		salt = hashlib.sha1( str( random.random() ) ).hexdigest()[ :5 ]
+		password = hashlib.sha1( salt + self.user.username ).hexdigest()[ :8 ]
 		self.user.set_password( password )
 		self.user.save()
 		email = EmailMessage( 

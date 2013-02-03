@@ -88,7 +88,7 @@ def photo( request, username, photo = None,  _ts = None, csrfmiddlewaretoken = N
 		# data[ 'photo' ] = not data[ 'valid' ]	# data[ 'view' ] = data[ 'valid' ]
 	return utils.success( kwargs, data = data )
 
-def reset( request, username = None, resetpass = None, csrfmiddlewaretoken = None, **kwargs ):
+def reset( request, username = None, email = None, resetpass = None, csrfmiddlewaretoken = None, **kwargs ):
 	kwargs[ 'page' ] = 'account/login'
 	data = { 'valid' : True, 'errors' : None, 'reset' : True }
 
@@ -96,12 +96,40 @@ def reset( request, username = None, resetpass = None, csrfmiddlewaretoken = Non
 		return utils.fail( kwargs, data = data, errors = 'Invalid Request' )
 	
 	try:
-		u = User.objects.get( username = username )
-		print u
+		u = User.objects.get( username = username, email = email )
 		if not u.is_active:
 			return utils.fail( kwargs, data = data, errors = 'Invalid Username' )
 		if not u.get_profile().reset():
 			return utils.fail( kwargs, data = data, errors = 'Error Sending Mail' )
+	except User.DoesNotExist:
+		return utils.fail( kwargs, data = data, errors = 'Invalid Username' )
+		
+	return utils.success( kwargs, data = data )
+
+def unlock( request, username, current, password = None, cnfpasswd = None, newpass = None,  _ts = None, csrfmiddlewaretoken = None, **kwargs ):
+	kwargs[ 'page' ] = 'account/unlock'
+	data = { 'valid' : False, 'errors' : None, 'unlock' : False, 'username' : username, 'current' : current }
+	
+	try :
+		u = User.objects.get( username = username )
+		p = u.get_profile()
+		if u.check_password( current ):
+			if not newpass:
+				return utils.success( kwargs, data = data )
+			
+			elif password == cnfpasswd:
+				u.set_password( password )
+				u.save()
+				data[ 'unlock' ] = True
+			else:
+				return utils.fail( kwargs, data = data, errors = 'Passwords do not match' )
+		else:
+			return utils.fail( kwargs, data = data, errors = 'Invalid Request' )
+		
+		data[ 'user' ] = u
+		data[ 'person' ] = p
+		data[ 'admin' ] = 1
+		data[ 'ratings' ] = set( [ p.id ] )
 	except User.DoesNotExist:
 		return utils.fail( kwargs, data = data, errors = 'Invalid Username' )
 		
