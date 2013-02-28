@@ -1,0 +1,108 @@
+#!/bin/bash
+
+cpu_spec[5]=G4
+cpu_spec[4]=G5
+cpu_spec[3]=PENTIUMPRO
+cpu_spec[2]=PRESCOTT
+cpu_spec[1]=CORE2
+cpu_len=${#cpu_spec[@]}
+
+debug_spec[2]="YES"
+debug_spec[1]="NO"
+
+cpu_name[5]="G4"
+cpu_name[4]="G5"
+cpu_name[3]="PentiumPro Family"
+cpu_name[2]="Pentium 4"
+cpu_name[1]="Core2"
+
+os_name=`uname -s`
+
+echo "Select CPU Family" 
+for (( i=1; i <= $cpu_len; i++)); do
+	echo "$i) ${cpu_name[${i}]}"
+done
+read -p "[default: 2] : " tmp
+if [ "$tmp" = "" ]; then
+	cpu_choice=2
+else
+	cpu_choice=$tmp
+fi
+
+read -p "Debugging Build (y/n) [default: n] : " tmp
+if [ "$tmp" = "" ]; then
+	debug_choice=1
+else
+	if [ "$tmp" = "y" ]; then
+		debug_choice=2
+	else
+		debug_choice=1
+	fi
+fi
+
+read -p "Install Directory [default: /usr/local] : " tmp
+if [ "$tmp" = "" ]; then
+	install_dir="/usr/local"
+else
+	install_dir=$tmp
+fi
+
+read -p "Build with MySQL Support (y/n) [default: y] : " tmp
+if [ "$tmp" = "" ]; then
+	mysql_choice=2
+else
+	if [ "$tmp" = "y" ]; then
+		mysql_choice=2
+	else
+		mysql_choice=1
+	fi
+fi
+
+if [ "$mysql_choice" = "2" ]; then
+    mysql=YES
+    mysql_cflags=`mysql_config --include`
+    mysql_libs=`mysql_config --libs`
+else
+    mysql=NO
+fi
+
+read -p "Build with SQLite Support (y/n) [default: y] : " tmp
+if [ "$tmp" = "" ]; then
+	sqlite_choice=2
+else
+	if [ "$tmp" = "y" ]; then
+		sqlite_choice=2
+	else
+		sqlite_choice=1
+	fi
+fi
+
+if [ "$sqlite_choice" = "2" ]; then
+    sqlite=YES
+    sqlite_libs="-lsqlite3"
+else
+    sqlite=NO
+fi
+
+read -p "Build with CURL Support (y/n) [default: y] : " tmp
+if [ "$tmp" = "" ]; then
+	curl_choice=2
+else
+	if [ "$tmp" = "y" ]; then
+		curl_choice=2
+	else
+		curl_choice=1
+	fi
+fi
+
+if [ "$curl_choice" = "2" ]; then
+    curl=YES
+    curl_cflags=`curl-config --cflags`
+    curl_libs=`curl-config --libs`
+else
+    curl=NO
+fi
+  
+printf "CPU=${cpu_spec[${cpu_choice}]}\nDEBUG=${debug_spec[${debug_choice}]}\nOPSYS=${os_name}\nINSTALLDIR=${install_dir}\nSQLITE=${sqlite}\nMYSQL=${mysql}\nMYSQL_CFLAGS=${mysql_cflags}\nMYSQL_LIBS=${mysql_libs}\nSQLITE_LIBS=${sqlite_libs}\nCURL=${curl}\nCURL_CFLAGS=${curl_cflags}\nCURL_LIBS=${curl_libs}\n\n" > config.inc
+echo
+echo "Done !"
